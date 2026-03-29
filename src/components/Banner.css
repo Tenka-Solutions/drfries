@@ -1,0 +1,161 @@
+/* Contenedor del banner */
+.banner-container {
+  position: relative;
+  width: 100%; /* Full width */
+  height: 450px; /* Increase height for better visibility on desktop */
+  margin-top: 45px; /* Remove margin to position the banner closer to the filter */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  background-color: transparent; /* Remove background color */
+  border-radius: 0; /* Ensure no rounded corners */
+}
+
+/* Imagen de banner */
+.banner-image {
+  width: 100%;
+  height: 100%; /* Ensure the image covers the container */
+  object-fit: cover; /* Ensure the image covers the container */
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  border-radius: 0; /* Ensure no rounded corners */
+}
+
+.banner-image.active {
+  opacity: 1;
+  position: absolute;
+}
+
+.banner-image.left {
+  transform: translateX(100%);
+}
+
+.banner-image.right {
+  transform: translateX(-100%);
+}
+
+.banner-image.active.left {
+  transform: translateX(0);
+}
+
+.banner-image.active.right {
+  transform: translateX(0);
+}
+
+.banner-image.slide-left {
+  transform: translateX(100%);
+}
+
+.banner-image.slide-right {
+  transform: translateX(-100%);
+}
+
+.banner-image.active.slide-left {
+  transform: translateX(0);
+}
+
+.banner-image.active.slide-right {
+  transform: translateX(0);
+}
+
+.banner-image.dragging {
+  transition: none; /* Disable transition during dragging */
+}
+
+/* Controles del banner */
+.banner-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+  color: white;
+  border: none; /* Remove border */
+  padding: 5px; /* Adjust padding */
+  cursor: pointer;
+  z-index: 10;
+  width: 30px; /* Adjust width */
+  height: 30px; /* Adjust height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  border-radius: 50%; /* Rounded corners */
+}
+
+.banner-control.prev {
+  left: 5px; /* Adjust left position */
+}
+
+.banner-control.next {
+  right: 5px; /* Adjust right position */
+}
+
+.banner-control:hover {
+  background-color: rgba(0, 0, 0, 0.7); /* Darker background on hover */
+}
+
+/* Indicadores del banner */
+.banner-indicator {
+  display: flex;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 5px;
+}
+
+.banner-indicator div {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.banner-indicator div.active {
+  background-color: rgba(255, 255, 255, 1);
+}
+  .banner-container {
+    height: 250px; /* Adjust height for mobile */
+    margin-top: 0px;
+  }
+
+  .banner-image {
+    width: 100%; /* Ensure the image covers the container */
+    height: 100%; /* Ensure the image covers the container */
+    object-fit: cover; /* Ensure the image covers the container */
+  }
+
+  .banner-control {
+    display: none; /* Hide controls on mobile devices */
+  }
+
+  @media (min-width: 768px) {
+    .banner-container {
+      position: relative;
+      width: 100%; /* Full width */
+      height: 160px; /* Increase height for better visibility on desktop */
+      margin-top: 0px; /* Remove margin to position the banner closer to the filter */
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+      background-color: transparent; /* Remove background color */
+      border-radius: 0; /* Ensure no rounded corners */
+    }
+
+    .banner-image {
+      width: 100%; /* Ensure the image covers the container */
+      height: 100%; /* Ensure the image covers the container */
+      object-fit: fill; /* Ensure the image covers the container */
+    }
+
+    .banner-control {
+      display: none; /* Hide controls on mobile devices */
+    }
+    }

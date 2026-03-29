@@ -1,0 +1,119 @@
+# Redirigir HTTP a HTTPS
+
+RewriteEngine On
+
+# Proxy inverso para las peticiones a la API
+
+RewriteRule ^api/(.*)$ http://localhost:5000/api/$1 [P,L]
+
+RewriteCond %{HTTPS} off
+
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+
+
+
+# Redirigir www a no-www (o viceversa)
+
+RewriteCond %{HTTP_HOST} ^www\.drfries\.cl [NC]
+
+RewriteRule ^(.*)$ https://drfries.cl/$1 [L,R=301]
+
+
+
+
+
+# Proteger archivos o directorios
+
+<Files .htaccess>
+
+    Order allow,deny
+
+    Deny from all
+
+</Files>
+
+
+
+# Configurar cach¨¦ para mejorar el rendimiento
+
+<IfModule mod_expires.c>
+
+    ExpiresActive On
+
+    ExpiresByType image/jpg "access plus 1 year"
+
+    ExpiresByType image/jpeg "access plus 1 year"
+
+    ExpiresByType image/gif "access plus 1 year"
+
+    ExpiresByType image/png "access plus 1 year"
+
+    ExpiresByType text/css "access plus 1 month"
+
+    ExpiresByType application/pdf "access plus 1 month"
+
+    ExpiresByType text/x-javascript "access plus 1 month"
+
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    ExpiresDefault "access plus 2 days"
+
+</IfModule>
+
+
+
+# Personalizar p¨¢ginas de error
+
+ErrorDocument 404 /404.html
+
+ErrorDocument 500 /500.html
+
+
+
+# Evitar el listado de directorios
+
+Options -Indexes
+
+
+
+# Comprimir archivos para mejorar el rendimiento
+
+<IfModule mod_deflate.c>
+
+    AddOutputFilterByType DEFLATE text/html
+
+    AddOutputFilterByType DEFLATE text/css
+
+    AddOutputFilterByType DEFLATE text/javascript
+
+    AddOutputFilterByType DEFLATE application/javascript
+
+    AddOutputFilterByType DEFLATE application/json
+
+    AddOutputFilterByType DEFLATE image/svg+xml
+
+</IfModule>
+
+
+
+
+
+<IfModule mod_rewrite.c>
+
+  RewriteEngine On
+
+  RewriteBase /
+
+  RewriteRule ^index\.html$ - [L]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  RewriteRule . /index.html [L]
+
+</IfModule>

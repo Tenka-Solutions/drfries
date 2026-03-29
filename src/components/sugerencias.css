@@ -1,0 +1,109 @@
+/* Importación de la fuente */
+@font-face { 
+  font-family: 'BebasNeue-Bold';
+  src: url('/assets/fonts/BebasNeue-Bold.ttf') format('truetype');
+}
+
+/* Contenedor del formulario */
+.contact-sugerencias {
+  font-family: 'BebasNeue-Bold', sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  color: #9b282b; /* Ensure text is readable */
+  font-size: 18px;
+}
+
+/* Estilo del encabezado de la sección */
+.section-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section-header h1 {
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 35px;
+  color: #ffffff; 
+}
+
+.section-header p {
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 15px;
+  color: #ffffff; 
+}
+
+/* Estilo del formulario */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilo de los grupos de formulario */
+.form-group {
+  margin-bottom: 0px;
+}
+
+/* Estilo de las entradas (input, select, textarea) */
+.form-control {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Ajuste del menú desplegable */
+select.form-control {
+  width: 100%;
+  max-width: 100%; /* Restringe el ancho máximo al contenedor */
+  box-sizing: border-box; /* Incluye bordes y padding dentro del ancho */
+  appearance: none; /* Elimina el estilo nativo del navegador */
+  overflow: hidden; /* Previene desbordamientos de contenido */
+  background-color: #fff; /* Asegura un fondo consistente */
+}
+
+/* Estilo del botón */
+.contact-form .btn.custom-btn {
+  padding: 10px 20px;
+  background-color: #9b282b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'BebasNeue-Bold', sans-serif;
+}
+
+.btn.custom-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Contenedor de fondo */
+.background-container {
+  background-image: url('../assets/eventoprime.jpg'); /* Ensure the path is correct */
+  background-size: cover;
+  background-position: center;
+  background-color: #f0f0f0; /* Fallback background color */
+  padding: 20px;
+  box-sizing: border-box;
+  min-height: 100vh; /* Ensure the container has a height */
+}
+
+
+  .form-control {
+    font-size: 14px;
+  }
+
+  select.form-control {
+    font-size: 14px; /* Ajusta el tamaño del texto en móviles */
+    max-width: 100%; /* Asegura que se ajuste al contenedor */
+    overflow-x: hidden; /* Evita desbordamientos horizontales */
+  }
+
+  .background-container {
+    padding: 15px;
+  }

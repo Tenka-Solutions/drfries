@@ -1,0 +1,138 @@
+.confirmation-page {
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    background-color: #f9f9f9;
+    margin: 100px auto;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .confirmation-page.success {
+    color: green;
+    background-color: #b6e4b6;
+    width: 90vw;
+    border-radius: 30px;
+  }
+  
+  .confirmation-page.failure {
+    color: red;
+    background-color: #f8d7da;
+    width: 90vw;
+    border-radius: 30px;
+  }
+  
+  .status-icon {
+    font-size: 80px;
+    margin-top: 30px;
+    animation: bounce 0.6s ease infinite;
+  }
+  
+  .status-icon i {
+    color: inherit;
+  }
+  
+  .status-icon .fas {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  
+  .confirmation-page h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  .confirmation-page .back-button {
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 30px;
+    font-size: 1.2rem;
+    background-color: green;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: background-color 0.3s ease;
+  }
+  
+.confirmation-box h2{
+  font-size: 50px;
+  font-family:'BebasNeue-Bold', sans-serif;
+  margin-top: -10px;
+}
+
+  .fas.fa-check-circle {
+    color: green;
+  }
+
+  .back-button.success {
+    background-color: green;
+}
+
+ .back-button.success:hover {
+    background-color: #105f10;
+ }
+
+ .back-button.failure {
+    background-color: red;
+}
+
+.back-button.failure:hover {
+    background-color: #800000;
+}
+
+.payment-details {
+  margin-top: 20px;
+  font-size: 24px;
+  font-family: "BebasNeue-Bold", sans-serif;
+}
+
+.payment-details p {
+  margin: -5px 0;
+}
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.retry-button {
+  background: #ffc107;
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.retry-button:hover {
+  background: #ffab00;
+}
+
+.error-message {
+  color: #dc3545;
+  margin: 1rem 0;
+  font-weight: bold;
+}
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }

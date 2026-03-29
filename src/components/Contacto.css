@@ -1,0 +1,264 @@
+@font-face {
+  font-family: 'BebasNeue-Bold';
+  src: url('../assets/fonts/BebasNeue-Bold.ttf') format('truetype');
+}
+
+/* ── Page ── */
+.ct-page {
+  background: #f4f4f4;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════
+   HERO
+══════════════════════════ */
+.ct-hero {
+  position: relative;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/assets/prueba_contacto1.jpg');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .ct-hero { height: 200px; }
+}
+
+.ct-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(0,0,0,0.3) 0%,
+    rgba(0,0,0,0.62) 55%,
+    rgba(70,8,8,0.9) 100%
+  );
+}
+
+.ct-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+}
+
+.ct-hero-eyebrow {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+.ct-hero-title {
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: clamp(3rem, 10vw, 6rem);
+  line-height: 0.95;
+  color: #fff;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.ct-hero-sub {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ══════════════════════════
+   MAIN SECTION
+══════════════════════════ */
+.ct-main {
+  padding: 56px 24px 72px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Two-column grid */
+.ct-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .ct-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .ct-main { padding: 36px 16px 56px; }
+}
+
+/* ── Info sidebar ── */
+.ct-info {
+  background: #9b282b;
+  border-radius: 16px;
+  padding: 36px 32px;
+  color: #fff;
+  position: sticky;
+  top: 80px;
+}
+
+.ct-info-title {
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0 0 12px;
+  line-height: 1;
+}
+
+.ct-info-desc {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.55;
+  margin: 0 0 28px;
+}
+
+.ct-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ct-info-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+}
+
+.ct-info-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+.ct-info-icon.wa  { background: #25d366; }
+.ct-info-icon.ig  { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.ct-info-icon.pin { background: rgba(255,255,255,0.2); }
+
+/* ── Form card ── */
+.ct-form-wrap {
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+
+.ct-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Side-by-side row */
+.ct-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .ct-row { grid-template-columns: 1fr; }
+  .ct-form-wrap { padding: 24px 20px; }
+}
+
+/* Field */
+.ct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ct-field label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ct-field input,
+.ct-field textarea {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  color: #222;
+  background: #f8f8f8;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+  width: 100%;
+}
+
+.ct-field input:focus,
+.ct-field textarea:focus {
+  border-color: #9b282b;
+  box-shadow: 0 0 0 3px rgba(155,40,43,0.1);
+  background: #fff;
+}
+
+.ct-field input::placeholder,
+.ct-field textarea::placeholder {
+  color: #bbb;
+}
+
+/* Submit button */
+.ct-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: #9b282b;
+  color: #fff;
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  margin-top: 4px;
+}
+
+.ct-submit:hover {
+  background: #7a1e20;
+  transform: translateY(-2px);
+}
+
+.ct-submit svg {
+  font-size: 0.95rem;
+}

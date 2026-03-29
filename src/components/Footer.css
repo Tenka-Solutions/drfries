@@ -1,0 +1,123 @@
+.footer {
+  background-color: #111111;
+  color: #d4d4d4;
+  padding: 18px 0 0;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 160px;
+}
+
+.footer-section h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9b282b;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-list li {
+  margin-bottom: 5px;
+}
+
+.footer-list li a {
+  color: #bbb;
+  text-decoration: none;
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: color 0.2s ease;
+}
+
+.footer-list li a:hover {
+  color: #ffffff;
+}
+
+.footer-list li a i {
+  color: #9b282b;
+  width: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Social icons ── */
+.social-icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e1e1e;
+  color: #bbb;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.social-icons a:hover { transform: translateY(-2px); }
+.social-icons a.fb:hover { background: #1877f2; color: #fff; }
+.social-icons a.ig:hover { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
+.social-icons a.wa:hover { background: #25d366; color: #fff; }
+
+/* ── Bottom bar ── */
+.footer-bottom {
+  text-align: center;
+  margin-top: 16px;
+  padding: 8px 24px;
+  border-top: 1px solid #222;
+  font-size: 0.68rem;
+  color: #666;
+  line-height: 1.7;
+}
+
+.footer-bottom a {
+  color: #aaa;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.footer-bottom a:hover { color: #ffffff; }
+
+@media (max-width: 600px) {
+  .footer-container { padding: 0 14px; gap: 14px; }
+  .footer-section { min-width: 100%; }
+  .footer-content { gap: 14px; }
+  .social-icons { gap: 10px; }
+}

@@ -1,0 +1,16 @@
+.send-whatsapp-btn {
+    background-color: #25d366;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .send-whatsapp-btn:hover {
+    background-color: #1ebe57;
+  }

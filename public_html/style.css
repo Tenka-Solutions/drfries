@@ -1,0 +1,29 @@
+/* Estilos base para los iframes */
+.form-desktop,
+.form-mobile {
+    display: none;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Para pantallas móviles (menos de 700px) */
+@media screen and (max-width: 699px) {
+    .form-mobile {
+        display: block;
+    }
+    
+    .form-desktop {
+        display: none;
+    }
+}
+
+/* Para pantallas desktop (700px o más) */
+@media screen and (min-width: 700px) {
+    .form-desktop {
+        display: block;
+    }
+    
+    .form-mobile {
+        display: none;
+    }
+}

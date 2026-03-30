@@ -471,21 +471,7 @@
         "productCode":"PROM/FAMI"
       }
     },
-    {
-      "id": 34,
-      "productCode":"PROM/HAND",
-      "title": "Promo Handroll",
-      "description": "1 handroll de pollo y 1 bebida de lata 220cc",
-      "price": 3500,
-      "brand": "Dr Fries",
-      "category": "Promociones",
-      "Bebida": ["Coca-Cola","Fanta","Sprite"],
-      "img": "/assets/promociones/Promo_Handroll.png",
-      "toteatData":{
-        "jerarquia":"AB.030",
-        "productCode":"PROM/HAND"
-      }
-    },
+   
     {
       "id": 35,
       "productCode":"PROM/ESTU",
@@ -525,7 +511,7 @@
       "brand": "Dr Fries",
       "category": "Promociones",
       "Bebida": ["Coca-Cola","Fanta","Sprite"],
-      "img": "/assets/promociones/Insuperable.png",
+      "img": "/assets/promociones/",
       "toteatData":{
         "jerarquia":"AB.030",
         "productCode":"PROM/INSU"
@@ -540,7 +526,7 @@
       "brand": "Dr Fries",
       "category": "Promociones",
       "Bebida":["Coca-Cola","Fanta","Sprite"],
-      "img": "/assets/promociones/Promo_FriesKids.jpg",
+      "img": "/assets/promociones/Fries_kids.png",
       "toteatData":{
         "jerarquia":"AB.030",
         "productCode":"PROM/KIDS"
@@ -854,18 +840,6 @@
       "category": "Extras"
     },
     {
-      "id": 96,
-      "title": "Handroll",
-      "description": "1 Unidad de Pollo, Queso Crema y Cebollin",
-      "price": 2700,
-      "brand": "Dr Fries",
-      "category": "Especiales",
-      "toteatData":{
-        "jerarquia":"AB.080",
-        "productCode":"ESPECI/01"
-      }
-    },
-    {
     "id": 100,
     "title": "Sprite 1.5 lt",
     "description":  "Botella Sprite 1.5lt",
@@ -887,18 +861,6 @@
       "toteatData":{
         "jerarquia":"AB.090092",
         "productCode":"BEB21"
-      }
-    },
-    {
-      "id": 102,
-      "title": "Completo Gigante",
-      "description":  "Elije 2 Ingredientes , Completo de 26CM con Vienesa Llanquihue",
-      "price": 3700,
-      "brand": "Llanquihue",
-      "category": "Completos",
-      "toteatData":{
-        "jerarquia":"AB.010",
-        "productCode":"COMPL/00"
       }
     }
   ],

@@ -62,7 +62,7 @@ const Banner = ({ banners }) => {
 
   return (
     <div
-      className="banner-container"
+      className="banner-container d-lg-none"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

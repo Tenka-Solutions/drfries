@@ -79,7 +79,7 @@ const HomePage = ({ onStartShopping, isCartOpen }) => {
       </section>
 
       {/* ══ FEATURES STRIP ══ */}
-      <section className="hp-features">
+      <section className="hp-features d-none d-lg-flex">
         {FEATURES.map((f, i) => (
           <div className="hp-feature" key={i}>
             <span className="hp-feature-icon">{f.icon}</span>

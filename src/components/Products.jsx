@@ -509,7 +509,7 @@ export function Products({ products, searchText }) {
         <Banner banners={banners} className="products-banner-container" />
       </div>
       
-      <div className="products-section-title">
+      <div className="products-section-title d-none">
         {isSearching ? 'Buscando Resultados...' : (selectedCategory ? selectedCategory : 'Todos los productos')}
       </div>
 

@@ -4,7 +4,7 @@ import productsData from '../mocks/products.json';
 import { useCart } from '../hooks/useCart.js';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FaFire, FaMotorcycle, FaBolt, FaLeaf } from 'react-icons/fa';
+import { FaFire, FaMotorcycle, FaBolt, FaLeaf, FaClock } from 'react-icons/fa';
 import { GiFrenchFries } from 'react-icons/gi';
 
 import caupolicanImg   from '/assets/Caupolican.jpg';
@@ -14,8 +14,8 @@ import alcazarImg      from '/assets/Alcazar.jpg';
 import concepcionImg   from '/assets/Concepcion.jpg';
 
 const FEATURES = [
-  { icon: <FaFire />,       label: 'Siempre Fresco',     sub: 'Preparado al momento, sin congelados' },
-  { icon: <GiFrenchFries />, label: 'Papas Artesanales', sub: 'Cortadas y fritas en el local' },
+  { icon: <FaClock />,       label: 'Ahora Tambien 24Hrs', sub: 'Horario Nocturno 22:00 a 06:00' },
+  { icon: <GiFrenchFries />, label: 'Papas Naturales', sub: 'Cortadas y fritas en el local' },
   { icon: <FaBolt />,       label: 'Rápido y Sabroso',   sub: 'Tu pedido listo en minutos' },
   { icon: <FaMotorcycle />, label: 'Delivery',            sub: 'Llegamos donde estés' },
 ];

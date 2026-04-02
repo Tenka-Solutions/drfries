@@ -1,8 +1,9 @@
 
 /* ── Page wrapper ── */
 .products {
-  background: #f4f4f4;
+  background: #fa0101;
   min-height: 100vh;
+  
 }
 
 /* ── Sticky category bar ── */

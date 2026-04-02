@@ -48,3 +48,6 @@ backend/ssl/
 .vscode/
 *.swp
 *.swo
+
+# Local Netlify folder
+.netlify

@@ -525,7 +525,7 @@
       "brand": "Dr Fries",
       "category": "Promociones",
       "Bebida": ["Coca-Cola","Fanta","Sprite"],
-      "img": "/assets/promociones/",
+      "img": "/assets/promociones/Insuperable.png",
       "toteatData":{
         "jerarquia":"AB.030",
         "productCode":"PROM/INSU"

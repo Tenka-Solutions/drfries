@@ -1,8 +1,3 @@
-/* Importación de la fuente */
-@font-face { 
-  font-family: 'BebasNeue-Bold';
-  src: url('/assets/fonts/BebasNeue-Bold.ttf') format('truetype');
-}
 
 /* Contenedor del formulario */
 .contact-sugerencias {

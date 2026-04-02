@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import emailjs from 'emailjs-com';
-import './Sugerencias.css';
+import './sugerencias.css';
 import backgroundImage from '/assets/eventos/eventoprime.jpg'; // Import the image
 import Swal from 'sweetalert2';
 

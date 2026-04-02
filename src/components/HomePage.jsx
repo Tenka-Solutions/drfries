@@ -59,8 +59,8 @@ const HomePage = ({ onStartShopping, isCartOpen }) => {
 
       {/* ══ BRAND BAR ══ */}
       <section className="hp-brand-bar">
-        <div className="hp-brand-overlay" />
-        <div className="hp-brand-content d-none d-lg-flex">
+        <div className="hp-brand-overlay d-none d-lg-flex" />
+        <div className="hp-brand-content ">
           <span className="hp-brand-eyebrow">Los Ángeles · Concepción</span>
           <h1 className="hp-brand-title">DR. FRIES</h1>
           <p className="hp-brand-sub">El sabor que el sur se merece</p>

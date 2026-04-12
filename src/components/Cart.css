@@ -305,6 +305,9 @@
 .cart-total {
   text-align: center;
   margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .original-price {
@@ -327,6 +330,18 @@
   font-size: 0.82rem;
   text-align: center;
   margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.cart-note {
+  background: #fdf0f0;
+  color: #7d2426;
+  border: 1px solid #f0d4d4;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-bottom: 12px;
 }
 
 /* ── Cart action buttons ── */
@@ -400,7 +415,8 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 10px 14px;
   font-size: 0.92rem;
@@ -414,9 +430,16 @@
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
   border-color: #9b282b;
   box-shadow: 0 0 0 3px rgba(155, 40, 43, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+  font-family: inherit;
 }
 
 /* Custom select arrow */
@@ -478,6 +501,49 @@
   border-top: 1.5px solid #f0d4d4;
   display: flex;
   justify-content: center;
+}
+
+.checkout-summary {
+  background: #fdf0f0;
+  border: 1px solid #f0d4d4;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  color: #5b1d1f;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkout-summary p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.checkout-success {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.checkout-success h3 {
+  margin: 0;
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 2rem;
+  color: #9b282b;
+}
+
+.checkout-success p {
+  margin: 0;
+  color: #4b4b4b;
+  line-height: 1.45;
+}
+
+.checkout-success-code {
+  font-weight: 700;
+  color: #9b282b !important;
 }
 
 .confirm-payment-btn {

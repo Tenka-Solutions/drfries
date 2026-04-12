@@ -1,22 +1,57 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './Cart.css';
 import { useCart } from '../hooks/useCart.js';
-import { useNavigate } from 'react-router-dom';
-import { PaymentService } from '../services/api/paymentService.js';
+import { createFudoOrder } from '../services/api/fudoOrderService.js';
 
-function CartItem({ price, title, quantity, selectedOption, onAdd, onDecrease }) {
+function formatPrice(value) {
+  return Number(value || 0).toLocaleString('es-CL');
+}
+
+function createInitialFormData() {
+  return {
+    name: '',
+    phone: '',
+    comment: '',
+  };
+}
+
+function getOrderErrorMessage(error) {
+  const baseMessage = error?.message || 'No pudimos enviar tu pedido.';
+  const details = error?.details?.details || error?.details || {};
+  const saleId = details?.saleId;
+  const createdItems = Array.isArray(details?.createdItems) ? details.createdItems.length : 0;
+
+  if (!saleId) {
+    return baseMessage;
+  }
+
+  if (createdItems > 0) {
+    return `${baseMessage} La venta ${saleId} ya fue creada en Fudo y se cargaron ${createdItems} item(s) antes del error.`;
+  }
+
+  return `${baseMessage} La venta ${saleId} ya fue creada en Fudo.`;
+}
+
+function CartItem({ item, onAdd, onDecrease }) {
+  const itemTitle = item.title || item.name || 'Producto';
+  const selectedOption = item.selectedOption || item.selections;
+
   return (
     <li className="cart-item">
       <div className="cart-item-details">
-        <strong className="cart-item-title">{title}</strong>
-        {selectedOption && <small className="cart-item-option">Opción: {selectedOption}</small>}
+        <strong className="cart-item-title">{itemTitle}</strong>
+        {selectedOption && <small className="cart-item-option">Opcion: {selectedOption}</small>}
         <div className="cart-item-quantity-price">
-          <span className="cart-item-quantity">Cantidad: {quantity}</span>
-          <span className="cart-item-price">Precio: ${price}</span>
+          <span className="cart-item-quantity">Cantidad: {item.quantity}</span>
+          <span className="cart-item-price">${formatPrice(item.price)}</span>
           <div className="quantity-controls extra-item-buttons">
-            <button className="cart-item-remove-btn" onClick={onDecrease}>-</button>
-            <span className="cart-item-quantity" >{quantity}</span>
-            <button className="cart-item-add-btn" onClick={onAdd}>+</button>
+            <button className="cart-item-remove-btn" onClick={onDecrease} type="button">
+              -
+            </button>
+            <span className="cart-item-quantity">{item.quantity}</span>
+            <button className="cart-item-add-btn" onClick={onAdd} type="button">
+              +
+            </button>
           </div>
         </div>
       </div>
@@ -25,250 +60,179 @@ function CartItem({ price, title, quantity, selectedOption, onAdd, onDecrease })
 }
 
 export function Cart({ isOpen, toggleCart }) {
-  const { cart, clearCart, addToCart, decreaseQuantity, totalPrice, finalPrice, applyDiscount, discountApplied } = useCart();
-  const [isLoading, setIsLoading] = useState(false);
+  const { cart, clearCart, addToCart, decreaseQuantity, totalPrice } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '+569 ', // Teléfono con formato chileno
-    email: '', // Agregar campo de email
-    deliveryType: '',
-    localPickup: '',
-    address: '',
-    comment: '' // Agregar campo para comentarios
-  });
-  const [discountCode, setDiscountCode] = useState('');
-  const [discountError, setDiscountError] = useState('');
-  const navigate = useNavigate();
+  const [orderSuccess, setOrderSuccess] = useState(null);
+  const [formData, setFormData] = useState(createInitialFormData());
+
+  const totalItems = useMemo(
+    () => cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+    [cart],
+  );
 
   useEffect(() => {
-    if (isOpen) document.body.classList.add('no-scroll');
-    else document.body.classList.remove('no-scroll');
-  }, [isOpen]);
+    if (isOpen || showSummary) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'phone' ? value.replace(/[^0-9+]/g, '') : value
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [isOpen, showSummary]);
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((currentData) => ({
+      ...currentData,
+      [name]: name === 'phone' ? value.replace(/[^\d+\s()-]/g, '') : value,
     }));
   };
 
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-        setError('El nombre es requerido');
-        return false;
-    }
-
-    if (!formData.phone.match(/^\+569\d{8}$/)) {
-        setError('El teléfono debe tener formato +569 XXXXXXXX');
-        return false;
-    }
-
-    if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        setError('Email inválido');
-        return false;
-    }
-
-    if (formData.deliveryType === 'delivery' && !formData.address.trim()) {
-        setError('La dirección es requerida para delivery');
-        return false;
-    }
-
-    if (formData.deliveryType === 'pickup' && !formData.localPickup) {
-        setError('Debe seleccionar un local para retiro');
-        return false;
-    }
-
-    return true;
-};
-
-const handleCheckout = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setIsLoading(true);
+  const resetCheckoutState = () => {
     setError(null);
+    setOrderSuccess(null);
+    setFormData(createInitialFormData());
+  };
 
-    try {
-        const paymentData = {
-            amount: Math.round(finalPrice),
-            buyOrder: `ORDEN${Date.now()}`,
-            returnUrl: 'https://drfries.cl/confirmacion',
-            items: cart.map(item => ({
-              ...item
-            })),
-            customer: {
-                name: formData.name,
-                phone: formData.phone.replace(/\s/g, ''),
-                email: formData.email || 'pagosweb@drfries.cl',
-                deliveryType: formData.deliveryType,
-                address: formData.deliveryType === 'delivery' ? formData.address : '',
-                localPickup: formData.deliveryType === 'pickup' ? formData.localPickup : ''
-            }
-        };
+  const handleOpenSummary = () => {
+    setError(null);
+    setOrderSuccess(null);
+    setShowSummary(true);
+  };
 
-        console.log('Enviando datos:', paymentData);
-        const response = await PaymentService.createTransaction(paymentData);
-        console.log('Respuesta recibida:', response);
-
-        if (!response?.url || !response?.token) {
-            throw new Error('Respuesta inválida del servidor');
-        }
-
-        localStorage.setItem('pendingOrder', JSON.stringify({
-            items: cart,
-            customer: formData,
-            total: finalPrice,
-            token: response.token
-        }));
-
-        window.location.href = `${response.url}?token_ws=${response.token}`;
-
-    } catch (error) {
-        console.error("Error detallado:", error);
-        setError(error.message);
-    } finally {
-        setIsLoading(false);
-    }
-};
-
-  const handleApplyDiscount = () => {
-    if (discountCode.trim() === '') {
-      setDiscountError('Ingrese un código de descuento');
+  const handleCloseSummary = () => {
+    if (isSubmitting) {
       return;
     }
 
-    if (applyDiscount(discountCode)) {
-      setDiscountError('');
-      setDiscountCode('');
-    } else {
-      setDiscountError('Código inválido o ya utilizado');
-    }
+    setShowSummary(false);
+    resetCheckoutState();
   };
 
-  // Función para verificar horarios
-  const getAvailableLocations = () => {
-    const now = new Date();
-    const day = now.getDay(); // 0 es domingo
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const currentTime = hours * 60 + minutes;
-
-    // Lista base de locales
-    const allLocations = [
-        { id: '01', name: 'Caupolican 654', address: 'Los Angeles' },
-        { id: '02', name: 'Azaleas, Supermercadp aCuenta', address: 'Los Angeles' },
-        { id: '03', name: 'Alcazar 635, Lider Express', address: 'Los Angeles' },
-        { id: '04', name: 'Ricardo Vicuña 284 , Hiper Lider', address: 'Los Angeles' },
-        { id: '05', name: 'MallPlaza Trebol', address: 'Concepcion' }
-    ];
-
-    if (day === 0) { // Domingo
-        const time1100 = 11 * 60;  // 11:00
-        const time1830 = 18 * 60 + 30;  // 18:30
-        return allLocations.filter(() => currentTime >= time1100 && currentTime <= time1830);
-    } else { // Lunes a Sábado
-        const time1030 = 10* 60;  // 10:00 todo
-        const time1230 = 12 * 60 + 30;  // 12:30
-        const time1930 = 19* 60 + 30;  // 19:30
-
-        return allLocations.filter(location => {
-            if (location.id === '01') {
-                return currentTime >= time1230 && currentTime <= time1930;
-            } else {
-                return currentTime >= time1030 && currentTime <= time1930;
-            }
-        });
+  const handleCloseCart = () => {
+    if (isSubmitting) {
+      return;
     }
-};
 
-  // Función para verificar si el delivery está disponible
-  const isDeliveryAvailable = () => {
-    const now = new Date();
-    const day = now.getDay(); // 0 es domingo
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const currentTime = hours * 60 + minutes;
+    toggleCart();
+  };
 
-    if (day === 0) { // Domingo
-        const time1100 = 13 * 60;  // 11:00
-        const time1830 = 18 * 60 + 30;  // 18:30
-        return currentTime >= time1100 && currentTime <= time1830;
-    } else { // Lunes a Sábado
-        const time1230 = 12 * 60 + 30;  // 12:30
-        const time1930 = 19 * 60 + 30;  // 19:30
-        return currentTime >= time1230 && currentTime <= time1930;
+  const validateCheckout = () => {
+    if (cart.length === 0) {
+      setError('Tu carrito esta vacio.');
+      return false;
     }
-};
+
+    if (!formData.name.trim()) {
+      setError('El nombre del cliente es obligatorio.');
+      return false;
+    }
+
+    const invalidItem = cart.find((item) => !String(item.productId || '').trim());
+
+    if (invalidItem) {
+      setError(`El producto "${invalidItem.title || invalidItem.name || 'sin nombre'}" no esta listo para enviar a Fudo.`);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmitOrder = async (event) => {
+    event.preventDefault();
+
+    if (!validateCheckout()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await createFudoOrder({
+        customer: {
+          name: formData.name,
+          phone: formData.phone,
+        },
+        items: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        comment: formData.comment,
+      });
+
+      setOrderSuccess({
+        saleId: response?.saleId || null,
+        itemsCount: Array.isArray(response?.items) ? response.items.length : cart.length,
+      });
+      clearCart();
+      setFormData(createInitialFormData());
+    } catch (submitError) {
+      setError(getOrderErrorMessage(submitError));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
       {isOpen && (
-        <div className="modal-cart" onClick={toggleCart}>
-          <div className="modal-cart-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-cart" onClick={handleCloseCart}>
+          <div className="modal-cart-content" onClick={(event) => event.stopPropagation()}>
             <header className="cart-header">
               <h2>Carrito de Compras</h2>
-              <button className="cart-close-btn" onClick={toggleCart}>&times;</button>
+              <button className="cart-close-btn" onClick={handleCloseCart} type="button">
+                &times;
+              </button>
             </header>
-            
+
             {cart.length === 0 ? (
               <div className="empty-cart-message">
-                <p><strong onClick={toggleCart}>Tu carrito está vacío</strong></p>
-                <br />
-                <button className="continue-shopping" onClick={toggleCart}>
+                <p>
+                  <strong>Tu carrito esta vacio</strong>
+                </p>
+                <button className="continue-shopping" onClick={handleCloseCart} type="button">
                   Seguir comprando
                 </button>
               </div>
             ) : (
               <>
                 <ul className="cart-list">
-                  {cart.map((product) => (
+                  {cart.map((item) => (
                     <CartItem
-                      key={product.uniqueId}
-                      onAdd={() => addToCart(product)}
-                      onDecrease={() => decreaseQuantity(product)}
-                      {...product}
+                      key={item.cartKey || item.uniqueId || item.productId}
+                      item={item}
+                      onAdd={() => addToCart(item)}
+                      onDecrease={() => decreaseQuantity(item)}
                     />
                   ))}
                 </ul>
-                
+
                 <footer className="cart-footer">
-                  <div className="discount-section">
-                    <input
-                      type="text"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value)}
-                      placeholder="Código de descuento"
-                      className="discount-input"
-                    />
-                    <button 
-                      onClick={handleApplyDiscount}
-                      className="apply-discount-btn"
-                      disabled={discountApplied}
-                    >
-                      Aplicar
-                    </button>
-                    {discountError && <p className="discount-error">{discountError}</p>}
-                    {discountApplied && <p className="discount-success">¡Descuento del 10% aplicado!</p>}
+                  <div className="cart-note">
+                    El pedido se enviara directo a Dr. Fries. El pago web se integrara mas adelante.
                   </div>
                   <div className="cart-total">
-                    {discountApplied && (
-                      <span className="original-price">Precio original: ${Math.round(totalPrice)}</span>
-                    )}
-                    <strong>Total: ${Math.round(finalPrice)}</strong>
+                    <span>{totalItems} producto(s)</span>
+                    <strong>Total: ${formatPrice(totalPrice)}</strong>
                   </div>
-                  {error && <div className="error-message">{error}</div>}
                   <div className="cart-buttons">
-                    <button className="cart-clear-btn" onClick={clearCart}>
+                    <button className="cart-clear-btn" onClick={clearCart} type="button">
                       Vaciar
                     </button>
                     <button
                       className="cart-checkout-btn"
-                      onClick={() => setShowSummary(true)}
-                      disabled={isLoading}
+                      onClick={handleOpenSummary}
+                      disabled={isSubmitting}
+                      type="button"
                     >
-                      {isLoading ? 'Procesando...' : 'Ir a Pagar'}
+                      Finalizar pedido
                     </button>
                   </div>
                 </footer>
@@ -279,140 +243,87 @@ const handleCheckout = async (e) => {
       )}
 
       {showSummary && (
-        <div className="modal-cart" onClick={() => setShowSummary(false)}>
-          <div className="modal-cart-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-cart" onClick={handleCloseSummary}>
+          <div className="modal-cart-content" onClick={(event) => event.stopPropagation()}>
             <header className="cart-header">
-              <h2>Datos del Comprador</h2>
-              <button className="cart-close-btn" onClick={() => setShowSummary(false)}>
+              <h2>Finalizar Pedido</h2>
+              <button className="cart-close-btn" onClick={handleCloseSummary} type="button">
                 &times;
               </button>
             </header>
-            
-            <form onSubmit={handleCheckout} className="checkout-form">
-              <div className="form-group">
-                <label>Tipo de Entrega:</label>
-                <div className="delivery-options">
-                  {isDeliveryAvailable() && (
-                    <label>
-                      <input
-                        type="radio"
-                        name="deliveryType"
-                        value="delivery"
-                        checked={formData.deliveryType === 'delivery'}
-                        onChange={handleInputChange}
-                        required
-                      />
-                      Delivery
-                    </label>
-                  )}
-                  <label>
-                    <input
-                      type="radio"
-                      name="deliveryType"
-                      value="pickup"
-                      checked={formData.deliveryType === 'pickup'}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    Retiro Local
-                  </label>
+
+            {orderSuccess ? (
+              <div className="checkout-success">
+                <h3>Pedido enviado</h3>
+                <p>Tu orden ya fue creada correctamente en Fudo.</p>
+                {orderSuccess.saleId && (
+                  <p className="checkout-success-code">Venta creada: {orderSuccess.saleId}</p>
+                )}
+                <p>Items enviados: {orderSuccess.itemsCount}</p>
+                <div className="form-actions">
+                  <button className="confirm-payment-btn" onClick={handleCloseSummary} type="button">
+                    Cerrar
+                  </button>
                 </div>
               </div>
-
-              {formData.deliveryType === 'pickup' && (
-                <div className="form-group">
-                  <label htmlFor="localPickup">Seleccione Local:</label>
-                  <select
-                    id="localPickup"
-                    name="localPickup"
-                    value={formData.localPickup}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccione un local</option>
-                    {getAvailableLocations().map(location => (
-                      <option key={location.id} value={location.id}>
-                        {location.name} - {location.address}
-                      </option>
-                    ))}
-                  </select>
+            ) : (
+              <form onSubmit={handleSubmitOrder} className="checkout-form">
+                <div className="checkout-summary">
+                  <p>Completa tus datos y enviaremos la orden al backend para crearla en Fudo.</p>
+                  <strong>Total del pedido: ${formatPrice(totalPrice)}</strong>
                 </div>
-              )}
 
-              {/* Mostrar el campo de dirección solo si es delivery */}
-              {formData.deliveryType === 'delivery' && (
                 <div className="form-group">
-                  <label htmlFor="address">Dirección de Entrega:</label>
+                  <label htmlFor="name">Nombre del cliente</label>
                   <input
                     type="text"
-                    id="address"
-                    name="address"
-                    value={formData.address}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
+                    autoComplete="name"
                   />
                 </div>
-              )}
 
-              <div className="form-group">
-                <label htmlFor="name">Nombre Completo:</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="phone">Teléfono de Contacto:</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  pattern="^\+569\d{8}$"
-                  required
-                />
-                <small className="phone-format">Formato: <strong>+569 </strong>12345678</small>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Email:</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
+                <div className="form-group">
+                  <label htmlFor="phone">Telefono de contacto (opcional)</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="correo@ejemplo.com"
-                />
-              </div>
+                    autoComplete="tel"
+                    placeholder="+56 9 1234 5678"
+                  />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="comment">Comentarios adicionales:</label>
-                <input
+                <div className="form-group">
+                  <label htmlFor="comment">Comentario del pedido (opcional)</label>
+                  <textarea
                     id="comment"
                     name="comment"
                     value={formData.comment}
                     onChange={handleInputChange}
-                    placeholder="Comentarios especiales para el pedido"
-                />
-              </div>
+                    rows="4"
+                    placeholder="Ej: sin salsa, retirar mas tarde, etc."
+                  />
+                </div>
 
-              <div className="form-actions">
-                <button
-                  type="submit"
-                  className="confirm-payment-btn"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Procesando Pago...' : 'Confirmar Pago'}
-                </button>
-              </div>
-            </form>
+                {error && <div className="error-message">{error}</div>}
+
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="confirm-payment-btn"
+                    disabled={isSubmitting || cart.length === 0}
+                  >
+                    {isSubmitting ? 'Enviando pedido...' : 'Enviar pedido'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

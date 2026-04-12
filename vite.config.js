@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://drfries.cl:5000', // URL del backend de Getnet
+        target: 'https://drfries.cl:5000', // URL del backend
         changeOrigin: true,
         secure: true, // Si se utilizan certificados autofirmados en el entorno de pruebas
         rewrite: (path) => path.replace(/^\/api/, '')

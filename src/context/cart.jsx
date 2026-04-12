@@ -2,6 +2,27 @@ import { createContext, useState } from 'react';
 
 export const CartContext = createContext();
 
+function normalizeCartProduct(product = {}) {
+  const productId = product.productId
+    ? String(product.productId)
+    : product.id !== undefined && product.id !== null
+      ? String(product.id)
+      : '';
+  const title = product.title || product.name || 'Producto';
+  const price = Number(product.price) || 0;
+  const cartKey = product.cartKey || (product.selections ? `${productId}:${product.selections}` : productId);
+
+  return {
+    ...product,
+    id: product.id ?? productId,
+    productId,
+    name: product.name || title,
+    title,
+    price,
+    cartKey,
+  };
+}
+
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [discountCode, setDiscountCode] = useState('');
@@ -10,27 +31,30 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     if (!product) return;
+    const normalizedProduct = normalizeCartProduct(product);
+
     setCart(currentCart => {
-      const existingProduct = currentCart.find(item => item.id === product.id);
+      const existingProduct = currentCart.find(item => item.cartKey === normalizedProduct.cartKey);
+
       if (existingProduct) {
         return currentCart.map(item => 
-          item.id === product.id 
+          item.cartKey === normalizedProduct.cartKey
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...currentCart, { ...product, quantity: 1, uniqueId: Date.now() }];
+      return [...currentCart, { ...normalizedProduct, quantity: 1, uniqueId: Date.now() }];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCart(currentCart => currentCart.filter(item => item.id !== productId));
+  const removeFromCart = (cartKey) => {
+    setCart(currentCart => currentCart.filter(item => item.cartKey !== cartKey));
   };
 
   const decreaseQuantity = (product) => {
     setCart(currentCart => {
       return currentCart.map(item => {
-        if (item.id === product.id) {
+        if (item.cartKey === product.cartKey) {
           const newQuantity = item.quantity - 1;
           return newQuantity === 0 ? null : { ...item, quantity: newQuantity };
         }

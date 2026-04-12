@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { products as initialProducts } from './mocks/products.json';
 import { Products } from './components/Products.jsx';
 import { Header } from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
-import { useFilters } from './hooks/useFilters.js';
 import { Cart } from './components/Cart.jsx';
 import { CartProvider } from './context/cart.jsx';
 import HomePage from './components/HomePage.jsx';
@@ -19,7 +17,6 @@ import ResultadoTransaccion from './pages/ResultadoTransaccion';
 import './index.css';
 
 function App() {
-  const { filterProducts } = useFilters();
   const [currentPage, setCurrentPage] = useState(() => localStorage.getItem('currentPage') || 'homepage');
   const [searchText, setSearchText] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -36,12 +33,6 @@ function App() {
     setIsCartOpen(!isCartOpen);
   };
 
-  const filteredProducts = initialProducts.filter((product) => {
-    const matchesTitle = product.title.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = product.category.toLowerCase().includes(searchText.toLowerCase());
-    return matchesTitle || matchesCategory;
-  });
-
   return (
     <Router>
       <CartProvider>
@@ -51,7 +42,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage onStartShopping={() => handleGoToPage('products')} isCartOpen={isCartOpen} />} />
             <Route path="/inicio" element={<HomePage onStartShopping={() => handleGoToPage('products')} isCartOpen={isCartOpen} />} />
-            <Route path="/products" element={<Products products={filteredProducts} searchText={searchText} />} />
+            <Route path="/products" element={<Products searchText={searchText} />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/eventos" element={<Eventos />} />
             <Route path="/sugerencias" element={<Sugerencias />} />

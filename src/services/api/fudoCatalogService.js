@@ -1,83 +1,4 @@
-const DEV_API_BASES = [
-  'http://localhost:5000/api/fudo',
-  '/api/fudo',
-];
-
-const PROD_API_BASES = [
-  '/api/fudo',
-];
-
-function getApiBases() {
-  return import.meta.env.DEV ? DEV_API_BASES : PROD_API_BASES;
-}
-
-async function parseJsonResponse(response) {
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) {
-    return response.json();
-  }
-
-  const text = await response.text();
-
-  if (!text) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { message: text };
-  }
-}
-
-function createRequestError(message, statusCode, details) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  error.details = details;
-  return error;
-}
-
-async function requestJsonFromCandidates(path, signal) {
-  const errors = [];
-
-  for (const baseUrl of getApiBases()) {
-    try {
-      const response = await fetch(`${baseUrl}/${path}`, {
-        headers: {
-          Accept: 'application/json',
-        },
-        signal,
-      });
-
-      const payload = await parseJsonResponse(response);
-
-      if (!response.ok) {
-        throw createRequestError(
-          payload?.message || `Request failed with status ${response.status}`,
-          response.status,
-          payload,
-        );
-      }
-
-      return payload;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw error;
-      }
-
-      errors.push(error);
-    }
-  }
-
-  const lastError = errors.at(-1);
-
-  if (lastError) {
-    throw lastError;
-  }
-
-  throw new Error(`Unable to fetch ${path}`);
-}
+import { requestFudoApi } from './fudoApiService.js';
 
 function mapCategories(categories = []) {
   return categories
@@ -94,6 +15,8 @@ function mapProducts(products = [], categoryMap) {
 
     return {
       id: product.id,
+      productId: String(product.id),
+      name: product.name || 'Producto sin nombre',
       title: product.name || 'Producto sin nombre',
       description: product.description || 'Sin descripción disponible.',
       price: Number(product.price) || 0,
@@ -122,7 +45,7 @@ function normalizeCatalog({ categories = [], products = [] }) {
 
 export async function getFudoCatalog({ signal } = {}) {
   try {
-    const catalog = await requestJsonFromCandidates('catalog', signal);
+    const catalog = await requestFudoApi('catalog', { signal });
 
     if (Array.isArray(catalog?.products)) {
       return normalizeCatalog(catalog);
@@ -134,8 +57,8 @@ export async function getFudoCatalog({ signal } = {}) {
   }
 
   const [productsPayload, categoriesPayload] = await Promise.all([
-    requestJsonFromCandidates('products', signal),
-    requestJsonFromCandidates('categories', signal),
+    requestFudoApi('products', { signal }),
+    requestFudoApi('categories', { signal }),
   ]);
 
   return normalizeCatalog({

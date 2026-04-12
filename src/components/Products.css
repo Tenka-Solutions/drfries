@@ -68,6 +68,48 @@
   line-height: 1;
 }
 
+.products-feedback {
+  margin: 20px 16px 28px;
+  padding: 24px 20px;
+  border: 1px solid #edd1d1;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdfd 0%, #fff4f4 100%);
+  box-shadow: 0 10px 24px rgba(155, 40, 43, 0.08);
+  text-align: center;
+}
+
+.products-feedback-title {
+  margin: 0 0 8px;
+  font-family: 'BebasNeue-Bold', sans-serif;
+  font-size: 1.8rem;
+  color: #9b282b;
+  letter-spacing: 0.04em;
+}
+
+.products-feedback-message {
+  margin: 0;
+  color: #6d5d5d;
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.products-feedback-action {
+  margin-top: 16px;
+  border: none;
+  border-radius: 999px;
+  background: #9b282b;
+  color: #fff;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.products-feedback-action:hover {
+  background: #7f1f22;
+}
+
 /* ── Product grid ── */
 .product-list {
   display: grid;
@@ -103,6 +145,10 @@
   padding: 0;
 }
 
+.product-list li.product-card-unavailable {
+  opacity: 0.72;
+}
+
 .product-list li:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 28px rgba(155, 40, 43, 0.15);
@@ -117,6 +163,19 @@
   background: linear-gradient(90deg, #9b282b, #d44f4f);
   width: 100%;
   flex-shrink: 0;
+}
+
+.product-image-wrapper {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff5f5 0%, #f6eaea 100%);
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 /* ── Card info ── */
@@ -164,6 +223,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-top: 8px;
 }
 
@@ -183,11 +243,27 @@
 
 .product-price:hover { color: #6b0000; }
 
-.product-add-hint {
-  font-size: 0.7rem;
-  color: #bbb;
-  font-family: 'Poppins', sans-serif;
+.product-add-button {
+  border: none;
+  border-radius: 999px;
+  background: #9b282b;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
   white-space: nowrap;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.product-add-button:hover {
+  background: #7f1f22;
+}
+
+.product-add-button:disabled {
+  background: #c7b5b5;
+  cursor: not-allowed;
+  opacity: 0.9;
 }
 
 /* ── Banner wrapper ── */
@@ -283,6 +359,20 @@
 }
 .modal-body::-webkit-scrollbar { width: 4px; }
 .modal-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+.modal-product-image-wrapper {
+  margin-bottom: 14px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f7eded;
+}
+
+.modal-product-image {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
 
 /* ── Extras / customizations ── */
 .modal-pedido {
@@ -391,6 +481,11 @@
 }
 .button-add:hover { background: #6b0000; }
 .button-add:active { transform: translateX(-50%) scale(0.99); }
+
+.button-add:disabled {
+  background: #c7b5b5;
+  cursor: not-allowed;
+}
 
 @media (min-width: 600px) {
   .button-add {

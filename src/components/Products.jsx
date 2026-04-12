@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Products.css';
 import { useCart } from '../hooks/useCart.js';
+import { useFudoCatalog } from '../hooks/useFudoCatalog.js';
 import Banner from './Banner';
 import { Filters } from './Filters.jsx';
 
@@ -25,9 +26,16 @@ import { RiDrinks2Fill } from "react-icons/ri";
 import { LuCoffee } from "react-icons/lu";
 import { IoFastFood } from "react-icons/io5";
 
-export function Products({ products, searchText }) {
-  const { addToCart } = useCart(); 
-  const [filteredProducts, setFilteredProducts] = useState(products);
+export function Products({ searchText = '' }) {
+  const { addToCart } = useCart();
+  const {
+    products,
+    categories: catalogCategories,
+    loading,
+    error,
+    reload,
+  } = useFudoCatalog();
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -59,29 +67,57 @@ export function Products({ products, searchText }) {
 
   const aderesoLimit = 4;
 
-  const normalizeText = (text) =>
-    text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const normalizeText = (text = '') =>
+    String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const filterCatalogProducts = (catalogProducts, categoryFilter, currentSearchText) => {
+    const normalizedSearchText = normalizeText(currentSearchText);
+
+    return catalogProducts.filter((product) => {
+      const matchesTitle = normalizeText(product.title).includes(normalizedSearchText);
+      const matchesCategory = normalizeText(product.category).includes(normalizedSearchText);
+      const matchesSearch = !normalizedSearchText || matchesTitle || matchesCategory;
+      const matchesCategoryFilter = !categoryFilter || product.category === categoryFilter;
+
+      return matchesSearch && matchesCategoryFilter;
+    });
+  };
+
+  const hasLegacyCustomizationOptions = Boolean(
+    selectedProduct && (
+      selectedProduct.flavors
+      || selectedProduct.sabores
+      || selectedProduct.salsas
+      || selectedProduct.Proteina
+      || selectedProduct.Aderezos
+      || selectedProduct.Variedades
+      || selectedProduct.Bebida
+      || selectedProduct.Bebida15
+      || selectedProduct.Bebida350
+    ),
+  );
+
+  const productImageUrl = selectedProduct?.imageUrl || selectedProduct?.img || null;
 
   useEffect(() => {
     setIsSearching(true);
     const timeout = setTimeout(() => {
-      const newFilteredProducts = products.filter((product) => {
-        const matchesTitle = normalizeText(product.title).includes(normalizeText(searchText));
-        const matchesCategory = normalizeText(product.category).includes(normalizeText(searchText));
-        return matchesTitle || matchesCategory;
-      });
-      setFilteredProducts(newFilteredProducts);
+      setFilteredProducts(filterCatalogProducts(products, selectedCategory, searchText));
       setIsSearching(false);
-    }, 500);
+    }, 250);
 
     return () => clearTimeout(timeout);
-  }, [searchText, products]);
+  }, [searchText, products, selectedCategory]);
 
-  const handleCategoryClick = (categoryId) => {
-    const newSelectedCategory = selectedCategory === categoryId ? null : categoryId;
-    setSelectedCategory(newSelectedCategory);
-    setFilteredProducts(products.filter((product) =>
-      newSelectedCategory === null || product.category === newSelectedCategory
+  useEffect(() => {
+    if (selectedCategory && !catalogCategories.some((category) => category.name === selectedCategory)) {
+      setSelectedCategory(null);
+    }
+  }, [catalogCategories, selectedCategory]);
+
+  const handleCategoryClick = (categoryName) => {
+    setSelectedCategory((currentCategory) => (
+      currentCategory === categoryName ? null : categoryName
     ));
   };
 
@@ -113,7 +149,15 @@ export function Products({ products, searchText }) {
     setExpandedVarieties((prev) => !prev);
   };
 
-  const categories = [...new Set(products.map((product) => product.category))].filter(category => category !== 'Extras' && category !== 'Especiales').concat('Especiales'); // Ensure "Especiales" is included
+  const categories = (
+    catalogCategories.length > 0
+      ? catalogCategories.map((category) => category.name)
+      : [...new Set(products.map((product) => product.category))]
+  ).filter(Boolean);
+
+  const visibleCategories = categories.filter((category) =>
+    filteredProducts.some((product) => product.category === category)
+  );
 
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
@@ -131,8 +175,28 @@ export function Products({ products, searchText }) {
     setSelectedProduct(null);
   };
 
+  const handleQuickAdd = (event, product) => {
+    event.stopPropagation();
+
+    if (!product.available) {
+      return;
+    }
+
+    addToCart(product);
+  };
+
   const handleAddToCart = () => {
     if (selectedProduct) {
+      if (selectedProduct.isFudoProduct) {
+        if (!selectedProduct.available) {
+          return;
+        }
+
+        addToCart(selectedProduct);
+        handleCloseModal();
+        return;
+      }
+
       if (selectedProduct.category === 'Sandwich' && !selectedProtein) {
         Swal.fire({
           icon: 'warning',
@@ -435,6 +499,10 @@ export function Products({ products, searchText }) {
   };
 
   const calculateTotalPrice = () => {
+    if (!selectedProduct) {
+      return 0;
+    }
+
     let totalPrice = selectedProduct.price; // Precio base del producto
 
     // Sumar el precio de los acompañamientos seleccionados
@@ -485,6 +553,50 @@ export function Products({ products, searchText }) {
       };
     }, []);
 
+  const renderState = ({ title, message, actionLabel, onAction }) => (
+    <div className="products-feedback">
+      <h2 className="products-feedback-title">{title}</h2>
+      <p className="products-feedback-message">{message}</p>
+      {actionLabel && onAction && (
+        <button className="products-feedback-action" onClick={onAction}>
+          {actionLabel}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderProductCard = (product) => {
+    const imageUrl = product.imageUrl || product.img;
+
+    return (
+      <li
+        key={product.id}
+        onClick={() => handleOpenModal(product)}
+        className={!product.available ? 'product-card-unavailable' : ''}
+      >
+        {imageUrl && (
+          <div className="product-image-wrapper">
+            <img className="product-image" src={imageUrl} alt={product.title} loading="lazy" />
+          </div>
+        )}
+        <div className="product-info">
+          <h2 className="product-title">{product.title}</h2>
+          <p className="product-description">{product.description}</p>
+          <div className="product-price-row">
+            <span className="product-price">${product.price.toLocaleString('es-CL')}</span>
+            <button
+              className="product-add-button"
+              onClick={(event) => handleQuickAdd(event, product)}
+              disabled={!product.available}
+            >
+              {product.available ? 'Agregar' : 'Sin stock'}
+            </button>
+          </div>
+        </div>
+      </li>
+    );
+  };
+
   return (
     <main className="products">
 
@@ -513,38 +625,31 @@ export function Products({ products, searchText }) {
         {isSearching ? 'Buscando Resultados...' : (selectedCategory ? selectedCategory : 'Todos los productos')}
       </div>
 
-      {selectedCategory ? (
+      {loading ? renderState({
+        title: 'Cargando menú',
+        message: 'Estamos trayendo el catálogo actualizado desde Fudo.',
+      }) : error ? renderState({
+        title: 'No pudimos cargar el menú',
+        message: error.message || 'Intenta nuevamente en unos segundos.',
+        actionLabel: 'Reintentar',
+        onAction: reload,
+      }) : filteredProducts.length === 0 ? renderState({
+        title: 'Sin productos disponibles',
+        message: selectedCategory || searchText
+          ? 'No encontramos productos para ese filtro.'
+          : 'Todavía no hay productos publicados para la web.',
+      }) : selectedCategory ? (
         <ul className="product-list">
-          {filteredProducts.slice(0, 99).map((product) => (
-            <li key={product.id} onClick={() => handleOpenModal(product)}>
-              <div className="product-info">
-                <h2 className="product-title">{product.title}</h2>
-                <p className="product-description">{product.description}</p>
-                <div className="product-price-row">
-                  <span className="product-price">${product.price.toLocaleString('es-CL')}</span>
-                  <span className="product-add-hint">Toca para pedir →</span>
-                </div>
-              </div>
-            </li>
-          ))}
+          {filteredProducts.map(renderProductCard)}
         </ul>
       ) : (
-        categories.map((category) => (
+        visibleCategories.map((category) => (
           <div key={category}>
             <h2 className="products-section-title">{category}</h2>
             <ul className="product-list">
-              {products.filter((product) => product.category === category).map((product) => (
-                <li key={product.id} onClick={() => handleOpenModal(product)}>
-                  <div className="product-info">
-                    <h2 className="product-title">{product.title}</h2>
-                    <p className="product-description">{product.description}</p>
-                    <div className="product-price-row">
-                      <span className="product-price">${product.price.toLocaleString('es-CL')}</span>
-                      <span className="product-add-hint">Toca para pedir →</span>
-                    </div>
-                  </div>
-                </li>
-              ))}
+              {filteredProducts
+                .filter((product) => product.category === category)
+                .map(renderProductCard)}
             </ul>
           </div>
         ))
@@ -559,8 +664,11 @@ export function Products({ products, searchText }) {
                   <p className='modal-prod-description'>{selectedProduct.description}</p>
               </div>
             <div className="modal-body">
-            
-              
+              {productImageUrl && (
+                <div className="modal-product-image-wrapper">
+                  <img className="modal-product-image" src={productImageUrl} alt={selectedProduct.title} />
+                </div>
+              )}
               {selectedProduct.flavors && renderFlavors(selectedProduct.flavors)}
               {selectedProduct.sabores && renderFlavors(selectedProduct.sabores)}
               {selectedProduct.salsas && renderSauces(selectedProduct.salsas)}
@@ -570,33 +678,40 @@ export function Products({ products, searchText }) {
               {selectedProduct.Bebida && renderBebida(selectedProduct.Bebida)}
               {selectedProduct.Bebida15 && renderBebida15(selectedProduct.Bebida15)}
               {selectedProduct.Bebida350 && renderBebida350(selectedProduct.Bebida350)}
-              {/*<p className='modal-prod-precio'>Precio: ${selectedProduct.price}</p>*/}
-              <h3 className='modal-pedido'>Complementa Tu Pedido!</h3>
-              {['Acompañamientos', 'Bebidas','Extras'].map((category) => (
-                (category !== 'Extras' || !['Postres y Dulces', 'Acompañamientos', 'Pollo Crispy', 'Promociones', 'Bebidas', 'Cafeteria','Especiales'].includes(selectedProduct.category)) && (
-                  <div key={category} className={`extra-category ${expandedCategories.includes(category) ? 'expanded' : ''}`}>
-                    <h4 onClick={() => handleToggleCategory(category)}>
-                      {category}
-                      <span>{expandedCategories.includes(category) ? ' ▼' : ' ►'}</span>
-                    </h4>
-                    {expandedCategories.includes(category) && (
-                      <div className="extra-items">
-                        {products.filter(product => product.category === category).map(extra => (
-                          <div key={extra.id} className="extra-item">
-                            <span>{extra.title} (+${extra.price})</span>
-                            <div className="extra-item-buttons">
-                              <button onClick={() => handleExtraQuantityChange(extra, -1)}>-</button>
-                              <span>{selectedExtras.find(item => item.id === extra.id)?.quantity || 0}</span>
-                              <button onClick={() => handleExtraQuantityChange(extra, 1)}>+</button>
-                            </div>
+              {hasLegacyCustomizationOptions && (
+                <>
+                  <h3 className='modal-pedido'>Complementa Tu Pedido!</h3>
+                  {['Acompañamientos', 'Bebidas','Extras'].map((category) => (
+                    (category !== 'Extras' || !['Postres y Dulces', 'Acompañamientos', 'Pollo Crispy', 'Promociones', 'Bebidas', 'Cafeteria','Especiales'].includes(selectedProduct.category)) && (
+                      <div key={category} className={`extra-category ${expandedCategories.includes(category) ? 'expanded' : ''}`}>
+                        <h4 onClick={() => handleToggleCategory(category)}>
+                          {category}
+                          <span>{expandedCategories.includes(category) ? ' ▼' : ' ►'}</span>
+                        </h4>
+                        {expandedCategories.includes(category) && (
+                          <div className="extra-items">
+                            {products.filter(product => product.category === category).map(extra => (
+                              <div key={extra.id} className="extra-item">
+                                <span>{extra.title} (+${extra.price})</span>
+                                <div className="extra-item-buttons">
+                                  <button onClick={() => handleExtraQuantityChange(extra, -1)}>-</button>
+                                  <span>{selectedExtras.find(item => item.id === extra.id)?.quantity || 0}</span>
+                                  <button onClick={() => handleExtraQuantityChange(extra, 1)}>+</button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
-                )
-              ))}
-              <button className="button-add" onClick={handleAddToCart}>Añadir al pedido (${calculateTotalPrice()})</button>
+                    )
+                  ))}
+                </>
+              )}
+              <button className="button-add" onClick={handleAddToCart} disabled={!selectedProduct.available}>
+                {selectedProduct.available
+                  ? `Añadir al pedido ($${calculateTotalPrice().toLocaleString('es-CL')})`
+                  : 'Producto sin stock'}
+              </button>
             </div>
           </div>
         </div>

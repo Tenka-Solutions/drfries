@@ -5,7 +5,6 @@ const PRODUCTS_QUERY = Object.freeze({
   'filter[active]': 'eq.true',
   include: 'productCategory',
   'page[size]': 1000,
-  sort: 'name',
 });
 
 function toBoolean(value) {
@@ -70,6 +69,29 @@ function mapProduct(product) {
   };
 }
 
+function compareProductsByPriceAsc(leftProduct, rightProduct) {
+  const leftPrice = toNumber(leftProduct?.price);
+  const rightPrice = toNumber(rightProduct?.price);
+
+  if (leftPrice === null && rightPrice === null) {
+    return String(leftProduct?.name || '').localeCompare(String(rightProduct?.name || ''));
+  }
+
+  if (leftPrice === null) {
+    return 1;
+  }
+
+  if (rightPrice === null) {
+    return -1;
+  }
+
+  if (leftPrice !== rightPrice) {
+    return leftPrice - rightPrice;
+  }
+
+  return String(leftProduct?.name || '').localeCompare(String(rightProduct?.name || ''));
+}
+
 function isWebProduct(product) {
   return toBoolean(product?.attributes?.active) && toBoolean(product?.attributes?.sellAlone);
 }
@@ -79,7 +101,8 @@ function normalizeProductsResponse(response, options = {}) {
   const normalizedPayload = {
     products: products
       .filter(isWebProduct)
-      .map(mapProduct),
+      .map(mapProduct)
+      .sort(compareProductsByPriceAsc),
   };
 
   if (options.includeRaw) {

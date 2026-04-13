@@ -38,7 +38,7 @@ export async function getFudoCategories() {
   const categories = Array.isArray(response?.data) ? response.data : [];
 
   return {
-    categories: sortCategoriesByName(categories.map(mapCategory)),
+    categories: categories.map(mapCategory),
   };
 }
 

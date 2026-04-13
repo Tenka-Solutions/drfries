@@ -1,7 +1,7 @@
 import { logger } from '../config/logger.js';
 import { fudoApiClient } from './fudoApiClient.js';
 
-const MAX_ID_LENGTH = 10;
+const MAX_ID_LENGTH = 10000;
 
 function createValidationError(message) {
   const error = new Error(message);
@@ -14,7 +14,7 @@ function normalizeId(value) {
 }
 
 function isValidFudoId(value) {
-  return /^\d{1,10}$/.test(value);
+  return /^\d{1,10000}$/.test(value);
 }
 
 function normalizeNumber(value) {

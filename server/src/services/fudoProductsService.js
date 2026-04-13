@@ -4,7 +4,7 @@ import { fudoApiClient } from './fudoApiClient.js';
 const PRODUCTS_QUERY = Object.freeze({
   'filter[active]': 'eq.true',
   include: 'productCategory',
-  'page[size]': 100,
+  'page[size]': 1000,
   sort: 'name',
 });
 

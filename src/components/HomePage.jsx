@@ -34,7 +34,7 @@ const LOCATIONS = [
 
 function getPromoProducts(products = []) {
   const availableProducts = products.filter((product) => product.available);
-  const promotions = availableProducts.filter((product) => product.category === 'Postres');
+  const promotions = availableProducts.filter((product) => product.category === 'Promociones');
 
   if (promotions.length > 0) {
     return promotions.slice(0, 6);

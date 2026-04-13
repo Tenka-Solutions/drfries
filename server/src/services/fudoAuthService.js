@@ -157,7 +157,7 @@ async function requestNewFudoToken() {
 }
 
 export async function getFudoToken(options = {}) {
-  const { forceRefresh = false } = options;
+  const { forceRefresh = true } = options;
 
   if (!forceRefresh && hasValidToken()) {
     return tokenCache.token;

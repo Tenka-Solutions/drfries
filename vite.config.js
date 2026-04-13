@@ -8,11 +8,15 @@ export default defineConfig({
     host: true,
     port: 3000,
     proxy: {
-      '/api': {
+      '/fudo': {
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/health': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

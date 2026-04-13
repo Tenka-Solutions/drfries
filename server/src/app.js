@@ -40,9 +40,9 @@ app.get('/', (_req, res) => {
     ...getHealthPayload(),
     message: 'Dr. Fries API is running',
     endpoints: [
-      '/api/health',
-      '/api/fudo/health',
-      '/api/fudo/products',
+      '/health',
+      '/fudo/health',
+      '/fudo/products',
     ],
   });
 });
@@ -51,13 +51,6 @@ app.get('/health', (_req, res) => {
   res.status(200).json(getHealthPayload());
 });
 
-app.get('/api/health', (_req, res) => {
-  res.status(200).json(getHealthPayload());
-});
-
-app.use('/api/fudo', fudoRoutes);
-
-// Keep compatibility with the current Vite proxy, which strips /api in dev.
 app.use('/fudo', fudoRoutes);
 
 app.use(notFoundHandler);

@@ -16,16 +16,10 @@ La API backend vive en `server/src` y reutiliza esta estructura:
 
 Endpoints principales disponibles:
 
-- `GET /api/health`
-- `GET /api/fudo/health`
-- `GET /api/fudo/products`
-- `GET /api/fudo/products?includeRaw=true`
-
-Compatibilidad local:
-
 - `GET /health`
 - `GET /fudo/health`
 - `GET /fudo/products`
+- `GET /fudo/products?includeRaw=true`
 
 ## Variables de entorno
 
@@ -52,7 +46,7 @@ FUDO_API_KEY=
 FUDO_API_SECRET=
 FUDO_API_BASE_URL=https://api.fu.do/v1alpha1
 FUDO_AUTH_URL=https://auth.fu.do/api
-VITE_API_BASE_URL=http://localhost:3001/api/fudo
+VITE_API_BASE_URL=http://localhost:3001/fudo
 ```
 
 ## Desarrollo local
@@ -80,14 +74,14 @@ El backend escuchara en `http://localhost:3001` por defecto.
 Para el frontend desplegado en Netlify, configura:
 
 ```env
-VITE_API_BASE_URL=https://api.drfries.cl/api/fudo
+VITE_API_BASE_URL=https://api.drfries.cl/fudo
 ```
 
 ## Pruebas con Postman
 
 ### 1. Health general
 
-`GET http://localhost:3001/api/health`
+`GET http://localhost:3001/health`
 
 Respuesta esperada:
 
@@ -101,7 +95,7 @@ Respuesta esperada:
 
 ### 2. Health Fudo
 
-`GET http://localhost:3001/api/fudo/health`
+`GET http://localhost:3001/fudo/health`
 
 Si `FUDO_API_KEY` y `FUDO_API_SECRET` estan configurados, el backend intenta autenticar contra Fudo y devuelve el estado del token cacheado.
 
@@ -121,19 +115,19 @@ Respuesta esperada:
 
 ### 3. Productos Fudo
 
-`GET http://localhost:3001/api/fudo/products`
+`GET http://localhost:3001/fudo/products`
 
 Consulta internamente:
 
 - `GET /products`
-- `filter[active]=true`
+- `filter[active]=eq.true`
 - `include=productCategory`
 - `page[size]=100`
 - `sort=name`
 
 Para incluir el payload crudo de Fudo en la misma respuesta:
 
-`GET http://localhost:3001/api/fudo/products?includeRaw=true`
+`GET http://localhost:3001/fudo/products?includeRaw=true`
 
 Respuesta normalizada esperada:
 
@@ -189,9 +183,9 @@ Notas:
 
 Para que el frontend en Netlify consuma el backend en cPanel:
 
-1. En Netlify configura `VITE_API_BASE_URL=https://api.drfries.cl/api/fudo`
+1. En Netlify configura `VITE_API_BASE_URL=https://api.drfries.cl/fudo`
 2. En cPanel configura `CLIENT_ORIGIN=https://drfries.cl,https://drfries.netlify.app,https://*.netlify.app`
 3. Reinicia la app Node.js en cPanel
 4. Redeploy del frontend en Netlify
 
-Con eso el frontend dejara de pedir `/api/fudo` al mismo dominio de Netlify y llamara directo al backend publicado en `api.drfries.cl`.
+Con eso el frontend dejara de depender de rutas relativas en Netlify y llamara directo al backend publicado en `api.drfries.cl`.

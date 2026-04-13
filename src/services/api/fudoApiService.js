@@ -2,14 +2,14 @@ const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim().re
 
 const DEV_API_BASES = [
   configuredApiBaseUrl,
-  'http://localhost:3001/api/fudo',
-  'http://localhost:5000/api/fudo',
-  '/api/fudo',
+  'http://localhost:3001/fudo',
+  'http://localhost:5000/fudo',
+  '/fudo',
 ].filter(Boolean);
 
 const PROD_API_BASES = [
   configuredApiBaseUrl,
-  '/api/fudo',
+  '/fudo',
 ].filter(Boolean);
 
 function getApiBases() {

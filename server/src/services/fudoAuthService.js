@@ -2,6 +2,7 @@ import { env, getMissingFudoEnvVars, hasFudoCredentials } from '../config/env.js
 import { logger } from '../config/logger.js';
 
 const TOKEN_EXPIRY_BUFFER_MS = 30_000;
+const FUDO_AUTH_TIMEOUT_MS = 10_000;
 
 const tokenCache = {
   token: null,
@@ -12,9 +13,11 @@ const tokenCache = {
 function createServiceError(message, statusCode, details) {
   const error = new Error(message);
   error.statusCode = statusCode;
+
   if (details) {
     error.details = details;
   }
+
   return error;
 }
 
@@ -50,6 +53,32 @@ function hasValidToken() {
   return Boolean(tokenCache.token) && Date.now() < tokenCache.expiresAtMs - TOKEN_EXPIRY_BUFFER_MS;
 }
 
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw createServiceError('Fudo auth request timed out', 504, {
+        url,
+        timeoutMs,
+      });
+    }
+
+    throw createServiceError('Unable to reach Fudo auth service', 502, {
+      url,
+      cause: error.message,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function requestNewFudoToken() {
   if (!hasFudoCredentials()) {
     throw createServiceError(
@@ -58,23 +87,31 @@ async function requestNewFudoToken() {
     );
   }
 
-  logger.info('Requesting new Fudo auth token');
-
-  const response = await fetch(env.fudoAuthUrl, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      apiKey: env.fudoApiKey,
-      apiSecret: env.fudoApiSecret,
-    }),
+  logger.info('Requesting new Fudo auth token', {
+    authUrl: env.fudoAuthUrl,
   });
+
+  const response = await fetchWithTimeout(
+    env.fudoAuthUrl,
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        apiKey: env.fudoApiKey,
+        apiSecret: env.fudoApiSecret,
+      }),
+    },
+    FUDO_AUTH_TIMEOUT_MS,
+  );
 
   const payload = await parseResponse(response);
 
   if (!response.ok) {
+    clearFudoTokenCache();
+
     logger.error('Fudo auth request failed', {
       statusCode: response.status,
       payload,
@@ -88,6 +125,8 @@ async function requestNewFudoToken() {
   }
 
   if (!payload?.token || typeof payload.exp === 'undefined') {
+    clearFudoTokenCache();
+
     throw createServiceError(
       'Fudo auth response did not include token and exp',
       502,
@@ -98,6 +137,8 @@ async function requestNewFudoToken() {
   const expiresAtMs = normalizeExpirationTimestamp(Number(payload.exp));
 
   if (!expiresAtMs) {
+    clearFudoTokenCache();
+
     throw createServiceError(
       'Fudo auth response contained an invalid exp value',
       502,

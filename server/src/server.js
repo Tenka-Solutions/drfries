@@ -1,11 +1,13 @@
 import app from './app.js';
-import { env, getMissingFudoEnvVars } from './config/env.js';
+import { env, getEnvironmentWarnings, getMissingFudoEnvVars } from './config/env.js';
 import { logger } from './config/logger.js';
 
 const server = app.listen(env.port, () => {
   logger.info('Server listening', {
     port: env.port,
     nodeEnv: env.nodeEnv,
+    allowedClientOrigins: env.allowedClientOrigins,
+    fudoApiBaseUrl: env.fudoApiBaseUrl,
   });
 
   const missingEnvVars = getMissingFudoEnvVars();
@@ -13,6 +15,14 @@ const server = app.listen(env.port, () => {
   if (missingEnvVars.length > 0) {
     logger.warn('Fudo credentials are not configured yet', {
       missingEnvVars,
+    });
+  }
+
+  const environmentWarnings = getEnvironmentWarnings();
+
+  if (environmentWarnings.length > 0) {
+    logger.warn('Environment configuration warnings detected', {
+      warnings: environmentWarnings,
     });
   }
 });

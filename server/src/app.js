@@ -1,5 +1,6 @@
-import cors from 'cors';
 import express from 'express';
+import { corsMiddleware } from './config/cors.js';
+import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 import fudoRoutes from './routes/fudoRoutes.js';
@@ -7,8 +8,9 @@ import fudoRoutes from './routes/fudoRoutes.js';
 const app = express();
 
 app.disable('x-powered-by');
-app.use(cors());
-app.use(express.json());
+app.set('trust proxy', 1);
+app.use(corsMiddleware);
+app.use(express.json({ limit: '1mb' }));
 
 app.use((req, res, next) => {
   const startedAt = Date.now();
@@ -25,11 +27,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({
+function getHealthPayload() {
+  return {
     status: 'OK',
     service: 'drfries-server',
-  });
+    environment: env.nodeEnv,
+  };
+}
+
+app.get('/health', (_req, res) => {
+  res.status(200).json(getHealthPayload());
+});
+
+app.get('/api/health', (_req, res) => {
+  res.status(200).json(getHealthPayload());
 });
 
 app.use('/api/fudo', fudoRoutes);

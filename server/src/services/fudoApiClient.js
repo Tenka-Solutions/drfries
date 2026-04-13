@@ -1,5 +1,8 @@
 import { env } from '../config/env.js';
-import { getFudoToken } from './fudoAuthService.js';
+import { logger } from '../config/logger.js';
+import { clearFudoTokenCache, getFudoToken } from './fudoAuthService.js';
+
+const FUDO_API_TIMEOUT_MS = 15_000;
 
 function appendQueryParams(url, params = {}) {
   Object.entries(params).forEach(([key, value]) => {
@@ -57,14 +60,43 @@ async function parseResponse(response) {
 function createApiError(message, statusCode, details) {
   const error = new Error(message);
   error.statusCode = statusCode;
+
   if (details) {
     error.details = details;
   }
+
   return error;
 }
 
-async function request(path, options = {}) {
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw createApiError('Fudo API request timed out', 504, {
+        url,
+        timeoutMs,
+      });
+    }
+
+    throw createApiError('Unable to reach Fudo API', 502, {
+      url,
+      cause: error.message,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function request(path, options = {}, attempt = 0) {
   const { params, ...fetchOptions } = options;
+  const url = buildUrl(path, params);
   const token = await getFudoToken();
   const headers = new Headers(fetchOptions.headers || {});
   let body = fetchOptions.body;
@@ -77,13 +109,26 @@ async function request(path, options = {}) {
     body = JSON.stringify(body);
   }
 
-  const response = await fetch(buildUrl(path, params), {
-    ...fetchOptions,
-    headers,
-    body,
-  });
+  const response = await fetchWithTimeout(
+    url,
+    {
+      ...fetchOptions,
+      headers,
+      body,
+    },
+    FUDO_API_TIMEOUT_MS,
+  );
 
   const payload = await parseResponse(response);
+
+  if (response.status === 401 && attempt === 0) {
+    logger.warn('Fudo API rejected the cached token, retrying once', {
+      url,
+    });
+
+    clearFudoTokenCache();
+    return request(path, options, attempt + 1);
+  }
 
   if (!response.ok) {
     throw createApiError(

@@ -74,6 +74,21 @@ function isWebProduct(product) {
   return toBoolean(product?.attributes?.active) && toBoolean(product?.attributes?.sellAlone);
 }
 
+function normalizeProductsResponse(response, options = {}) {
+  const products = Array.isArray(response?.data) ? response.data : [];
+  const normalizedPayload = {
+    products: products
+      .filter(isWebProduct)
+      .map(mapProduct),
+  };
+
+  if (options.includeRaw) {
+    normalizedPayload.raw = response;
+  }
+
+  return normalizedPayload;
+}
+
 export async function getFudoProductsRaw() {
   const response = await fudoApiClient.get('/products', {
     params: PRODUCTS_QUERY,
@@ -86,13 +101,7 @@ export async function getFudoProductsRaw() {
   return response;
 }
 
-export async function getFudoProductsCatalog() {
-  const response = await getFudoProductsRaw();
-  const products = Array.isArray(response?.data) ? response.data : [];
-
-  return {
-    products: products
-      .filter(isWebProduct)
-      .map(mapProduct),
-  };
+export async function getFudoProductsCatalog(options = {}) {
+  const response = options.rawResponse || await getFudoProductsRaw();
+  return normalizeProductsResponse(response, options);
 }

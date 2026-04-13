@@ -26,6 +26,11 @@ function groupProductsByCategoryId(products) {
   }, {});
 }
 
+function shouldIncludeRaw(query = {}) {
+  const flag = String(query.includeRaw ?? query.raw ?? '').trim().toLowerCase();
+  return ['1', 'true', 'yes'].includes(flag);
+}
+
 export async function getFudoHealth(_req, res, next) {
   try {
     await getFudoToken();
@@ -47,9 +52,15 @@ export async function getFudoHealth(_req, res, next) {
   }
 }
 
-export async function getFudoProducts(_req, res, next) {
+export async function getFudoProducts(req, res, next) {
   try {
-    const catalog = await getFudoProductsCatalog();
+    const includeRaw = shouldIncludeRaw(req.query);
+    const rawResponse = await getFudoProductsRaw();
+    const catalog = await getFudoProductsCatalog({
+      includeRaw,
+      rawResponse,
+    });
+
     res.status(200).json(catalog);
   } catch (error) {
     next(error);

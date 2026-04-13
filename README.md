@@ -44,7 +44,7 @@ Variables usadas por el backend:
 Ejemplo base:
 
 ```env
-PORT=5000
+PORT=3001
 NODE_ENV=development
 CLIENT_ORIGIN=http://localhost:3000
 FUDO_API_KEY=
@@ -73,13 +73,13 @@ Levantar el frontend:
 npm run dev
 ```
 
-El backend escuchara en `http://localhost:5000` por defecto.
+El backend escuchara en `http://localhost:3001` por defecto.
 
 ## Pruebas con Postman
 
 ### 1. Health general
 
-`GET http://localhost:5000/api/health`
+`GET http://localhost:3001/api/health`
 
 Respuesta esperada:
 
@@ -93,13 +93,27 @@ Respuesta esperada:
 
 ### 2. Health Fudo
 
-`GET http://localhost:5000/api/fudo/health`
+`GET http://localhost:3001/api/fudo/health`
 
 Si `FUDO_API_KEY` y `FUDO_API_SECRET` estan configurados, el backend intenta autenticar contra Fudo y devuelve el estado del token cacheado.
 
+Respuesta esperada:
+
+```json
+{
+  "success": true,
+  "service": "fudo",
+  "tokenReceived": true,
+  "authenticated": true,
+  "cached": true,
+  "valid": true,
+  "expiresAt": "2026-04-14T01:31:26.000Z"
+}
+```
+
 ### 3. Productos Fudo
 
-`GET http://localhost:5000/api/fudo/products`
+`GET http://localhost:3001/api/fudo/products`
 
 Consulta internamente:
 
@@ -111,7 +125,28 @@ Consulta internamente:
 
 Para incluir el payload crudo de Fudo en la misma respuesta:
 
-`GET http://localhost:5000/api/fudo/products?includeRaw=true`
+`GET http://localhost:3001/api/fudo/products?includeRaw=true`
+
+Respuesta normalizada esperada:
+
+```json
+{
+  "products": [
+    {
+      "id": "241",
+      "name": "AFFOGATO",
+      "description": "",
+      "price": 3500,
+      "imageUrl": null,
+      "categoryId": "9",
+      "available": false,
+      "stock": null,
+      "stockControl": true,
+      "sellAlone": true
+    }
+  ]
+}
+```
 
 ## Produccion y cPanel
 
@@ -120,7 +155,7 @@ El backend esta preparado para ejecutarse como Node.js App en cPanel:
 1. Sube el repositorio al servidor.
 2. En cPanel abre `Setup Node.js App`.
 3. Define como Application Root la carpeta del proyecto.
-4. Define como Application Startup File: `server/src/server.js`
+4. Define como Application Startup File: `app.js`
 5. Configura las variables de entorno del backend:
    - `NODE_ENV=production`
    - `PORT` asignado por cPanel
@@ -135,6 +170,8 @@ El backend esta preparado para ejecutarse como Node.js App en cPanel:
 Notas:
 
 - El servidor Express escucha siempre `process.env.PORT`.
+- Para cPanel Passenger se recomienda usar `app.js` en la raiz de la app. Ese archivo solo hace bootstrap del backend real que sigue viviendo en `server/src/server.js`.
+- Si tu hosting no acepta bien el entrypoint ESM raiz, deja como fallback `passenger.cjs`.
 - En produccion, CORS solo permite el origen configurado en `CLIENT_ORIGIN`.
 - La autenticacion Fudo reutiliza token en memoria y lo refresca automaticamente al expirar.
 - La base queda lista para agregar despues modulos de `sales`, `items` y `payments`.

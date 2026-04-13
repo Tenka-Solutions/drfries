@@ -9,9 +9,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://drfries.cl:5000', // URL del backend
+        target: 'http://localhost:3001',
         changeOrigin: true,
-        secure: true, // Si se utilizan certificados autofirmados en el entorno de pruebas
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
     },

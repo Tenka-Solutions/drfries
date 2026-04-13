@@ -1,4 +1,5 @@
 const DEV_API_BASES = [
+  'http://localhost:3001/api/fudo',
   'http://localhost:5000/api/fudo',
   '/api/fudo',
 ];

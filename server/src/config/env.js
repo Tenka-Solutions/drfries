@@ -1,8 +1,16 @@
 import dotenv from 'dotenv';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-dotenv.config();
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDirPath = path.dirname(currentFilePath);
+const projectRoot = path.resolve(currentDirPath, '../../..');
+const localEnvPath = path.join(projectRoot, '.env');
 
-const DEFAULT_PORT = 5000;
+dotenv.config(existsSync(localEnvPath) ? { path: localEnvPath } : undefined);
+
+const DEFAULT_PORT = 3001;
 const DEFAULT_NODE_ENV = 'development';
 const DEFAULT_CLIENT_ORIGINS = [
   'http://localhost:3000',
@@ -48,18 +56,22 @@ const configuredClientOrigins = parseList(process.env.CLIENT_ORIGIN);
 const allowedClientOrigins = nodeEnv === 'production'
   ? configuredClientOrigins
   : [...new Set([...DEFAULT_CLIENT_ORIGINS, ...configuredClientOrigins])];
+const isPortFromEnv = Boolean(process.env.PORT);
 
 export const env = {
   nodeEnv,
   isDevelopment: nodeEnv === 'development',
   isProduction: nodeEnv === 'production',
   port: parsePort(process.env.PORT),
+  portSource: isPortFromEnv ? 'process.env.PORT' : `default:${DEFAULT_PORT}`,
   clientOrigin: process.env.CLIENT_ORIGIN || '',
   allowedClientOrigins,
   fudoApiKey: process.env.FUDO_API_KEY || '',
   fudoApiSecret: process.env.FUDO_API_SECRET || '',
   fudoAuthUrl: normalizeUrl(process.env.FUDO_AUTH_URL, DEFAULT_FUDO_AUTH_URL),
   fudoApiBaseUrl: normalizeUrl(process.env.FUDO_API_BASE_URL, DEFAULT_FUDO_API_BASE_URL),
+  projectRoot,
+  cwd: process.cwd(),
 };
 
 export function getMissingFudoEnvVars() {
@@ -78,4 +90,20 @@ export function getEnvironmentWarnings() {
   }
 
   return warnings;
+}
+
+export function getEnvStatusSummary() {
+  return {
+    nodeEnv: env.nodeEnv,
+    nodeVersion: process.version,
+    port: env.port,
+    portSource: env.portSource,
+    cwd: env.cwd,
+    projectRoot: env.projectRoot,
+    clientOriginConfigured: Boolean(env.clientOrigin),
+    fudoApiKeyConfigured: Boolean(env.fudoApiKey),
+    fudoApiSecretConfigured: Boolean(env.fudoApiSecret),
+    fudoAuthUrl: env.fudoAuthUrl,
+    fudoApiBaseUrl: env.fudoApiBaseUrl,
+  };
 }

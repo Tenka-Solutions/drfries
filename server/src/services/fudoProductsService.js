@@ -2,7 +2,7 @@ import { logger } from '../config/logger.js';
 import { fudoApiClient } from './fudoApiClient.js';
 
 const PRODUCTS_QUERY = Object.freeze({
-  'filter[active]': true,
+  'filter[active]': 'eq.true',
   include: 'productCategory',
   'page[size]': 100,
   sort: 'name',

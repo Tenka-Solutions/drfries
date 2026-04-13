@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server/src/server.js",
-    "server:dev": "node --watch server/src/server.js"
+    "server:dev": "node --watch server/src/server.js",
+    "server:cpanel": "node app.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

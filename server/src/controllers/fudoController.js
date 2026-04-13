@@ -38,14 +38,13 @@ export async function getFudoHealth(_req, res, next) {
     const tokenStatus = getFudoTokenCacheStatus();
 
     res.status(200).json({
-      status: 'OK',
+      success: true,
       service: 'fudo',
+      tokenReceived: true,
       authenticated: true,
-      token: {
-        cached: tokenStatus.hasCachedToken,
-        valid: tokenStatus.isTokenValid,
-        expiresAt: tokenStatus.expiresAt,
-      },
+      cached: tokenStatus.hasCachedToken,
+      valid: tokenStatus.isTokenValid,
+      expiresAt: tokenStatus.expiresAt,
     });
   } catch (error) {
     next(error);

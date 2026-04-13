@@ -174,7 +174,7 @@ Notas:
 - El servidor Express escucha siempre `process.env.PORT`.
 - Para cPanel Passenger se recomienda usar `app.js` en la raiz de la app. Ese archivo solo hace bootstrap del backend real que sigue viviendo en `server/src/server.js`.
 - Si tu hosting no acepta bien el entrypoint ESM raiz, deja como fallback `passenger.cjs`.
-- En produccion, CORS solo permite el origen configurado en `CLIENT_ORIGIN`.
+- En produccion, CORS permite los dominios oficiales (`drfries.cl`, `www.drfries.cl`, `drfries.netlify.app` y `*.netlify.app`) mas los definidos en `CLIENT_ORIGIN`.
 - `CLIENT_ORIGIN` acepta multiples dominios separados por comas y soporta comodines, por ejemplo `https://*.netlify.app`.
 - La autenticacion Fudo reutiliza token en memoria y lo refresca automaticamente al expirar.
 - La base queda lista para agregar despues modulos de `sales`, `items` y `payments`.

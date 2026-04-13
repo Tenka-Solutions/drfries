@@ -17,7 +17,12 @@ const DEFAULT_CLIENT_ORIGINS = [
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  
+];
+const DEFAULT_PRODUCTION_CLIENT_ORIGINS = [
+  'https://drfries.cl',
+  'https://www.drfries.cl',
+  'https://drfries.netlify.app',
+  'https://*.netlify.app',
 ];
 const DEFAULT_FUDO_AUTH_URL = 'https://auth.fu.do/api';
 const DEFAULT_FUDO_API_BASE_URL = 'https://api.fu.do/v1alpha1';
@@ -54,9 +59,10 @@ function normalizeUrl(value, fallback) {
 
 const nodeEnv = normalizeNodeEnv(process.env.NODE_ENV);
 const configuredClientOrigins = parseList(process.env.CLIENT_ORIGIN);
-const allowedClientOrigins = nodeEnv === 'production'
-  ? configuredClientOrigins
-  : [...new Set([...DEFAULT_CLIENT_ORIGINS, ...configuredClientOrigins])];
+const defaultClientOrigins = nodeEnv === 'production'
+  ? DEFAULT_PRODUCTION_CLIENT_ORIGINS
+  : DEFAULT_CLIENT_ORIGINS;
+const allowedClientOrigins = [...new Set([...defaultClientOrigins, ...configuredClientOrigins])];
 const isPortFromEnv = Boolean(process.env.PORT);
 
 export const env = {
@@ -87,7 +93,7 @@ export function getEnvironmentWarnings() {
   const warnings = [];
 
   if (env.isProduction && !env.clientOrigin.trim()) {
-    warnings.push('CLIENT_ORIGIN is not configured for production');
+    warnings.push('CLIENT_ORIGIN is not configured for production; using built-in fallback origins');
   }
 
   return warnings;

@@ -35,6 +35,18 @@ function getHealthPayload() {
   };
 }
 
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    ...getHealthPayload(),
+    message: 'Dr. Fries API is running',
+    endpoints: [
+      '/api/health',
+      '/api/fudo/health',
+      '/api/fudo/products',
+    ],
+  });
+});
+
 app.get('/health', (_req, res) => {
   res.status(200).json(getHealthPayload());
 });

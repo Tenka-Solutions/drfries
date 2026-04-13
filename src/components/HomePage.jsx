@@ -50,7 +50,7 @@ const HomePage = ({ onStartShopping, isCartOpen }) => {
   const locationsRef = useRef(null);
 
   const promotionProducts = useMemo(() => getPromoProducts(products), [products]);
-  const promotionsTitle = promotionProducts.some((product) => product.category === 'Promociones')
+  const promotionsTitle = promotionProducts.some((product) => product.category === 'Postres')
     ? 'Promociones'
     : 'Destacados del menu';
 

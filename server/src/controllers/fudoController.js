@@ -33,7 +33,7 @@ function shouldIncludeRaw(query = {}) {
 
 export async function getFudoHealth(_req, res, next) {
   try {
-    await getFudoToken();
+    await getFudoToken({ forceRefresh: true });
 
     const tokenStatus = getFudoTokenCacheStatus();
 

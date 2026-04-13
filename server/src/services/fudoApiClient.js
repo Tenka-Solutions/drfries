@@ -97,7 +97,7 @@ async function fetchWithTimeout(url, options, timeoutMs) {
 async function request(path, options = {}, attempt = 0) {
   const { params, ...fetchOptions } = options;
   const url = buildUrl(path, params);
-  const token = await getFudoToken();
+  const token = await getFudoToken({ forceRefresh: true });
   const headers = new Headers(fetchOptions.headers || {});
   let body = fetchOptions.body;
 
@@ -122,7 +122,7 @@ async function request(path, options = {}, attempt = 0) {
   const payload = await parseResponse(response);
 
   if (response.status === 401 && attempt === 0) {
-    logger.warn('Fudo API rejected the cached token, retrying once', {
+    logger.warn('Fudo API rejected the token, retrying once', {
       url,
     });
 

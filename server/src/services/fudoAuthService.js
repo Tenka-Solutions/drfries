@@ -149,15 +149,17 @@ async function requestNewFudoToken() {
   tokenCache.token = payload.token;
   tokenCache.expiresAtMs = expiresAtMs;
 
-  logger.info('Fudo token cached successfully', {
+  logger.info('Fudo token stored successfully', {
     expiresAt: new Date(expiresAtMs).toISOString(),
   });
 
   return tokenCache.token;
 }
 
-export async function getFudoToken() {
-  if (hasValidToken()) {
+export async function getFudoToken(options = {}) {
+  const { forceRefresh = false } = options;
+
+  if (!forceRefresh && hasValidToken()) {
     return tokenCache.token;
   }
 

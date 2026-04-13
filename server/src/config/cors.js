@@ -8,12 +8,35 @@ function createCorsError(origin) {
   return error;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function createOriginMatcher(allowedOrigin) {
+  if (!allowedOrigin.includes('*')) {
+    return (origin) => origin === allowedOrigin;
+  }
+
+  const pattern = `^${allowedOrigin
+    .split('*')
+    .map(escapeRegExp)
+    .join('.*')}$`;
+  const regex = new RegExp(pattern);
+
+  return (origin) => regex.test(origin);
+}
+
+const originMatchers = env.allowedClientOrigins.map((origin) => ({
+  origin,
+  matches: createOriginMatcher(origin),
+}));
+
 function isAllowedOrigin(origin) {
   if (!origin) {
     return true;
   }
 
-  return env.allowedClientOrigins.includes(origin);
+  return originMatchers.some((matcher) => matcher.matches(origin));
 }
 
 export const corsMiddleware = cors({

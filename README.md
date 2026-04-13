@@ -40,6 +40,7 @@ Variables usadas por el backend:
 - `FUDO_API_SECRET`
 - `FUDO_API_BASE_URL`
 - `FUDO_AUTH_URL`
+- `VITE_API_BASE_URL`
 
 Ejemplo base:
 
@@ -51,6 +52,7 @@ FUDO_API_KEY=
 FUDO_API_SECRET=
 FUDO_API_BASE_URL=https://api.fu.do/v1alpha1
 FUDO_AUTH_URL=https://auth.fu.do/api
+VITE_API_BASE_URL=http://localhost:3001/api/fudo
 ```
 
 ## Desarrollo local
@@ -74,6 +76,12 @@ npm run dev
 ```
 
 El backend escuchara en `http://localhost:3001` por defecto.
+
+Para el frontend desplegado en Netlify, configura:
+
+```env
+VITE_API_BASE_URL=https://api.drfries.cl/api/fudo
+```
 
 ## Pruebas con Postman
 
@@ -159,7 +167,7 @@ El backend esta preparado para ejecutarse como Node.js App en cPanel:
 5. Configura las variables de entorno del backend:
    - `NODE_ENV=production`
    - `PORT` asignado por cPanel
-   - `CLIENT_ORIGIN=https://tu-dominio.com`
+   - `CLIENT_ORIGIN=https://drfries.cl,https://drfries.netlify.app,https://*.netlify.app`
    - `FUDO_API_KEY`
    - `FUDO_API_SECRET`
    - `FUDO_API_BASE_URL`
@@ -173,5 +181,17 @@ Notas:
 - Para cPanel Passenger se recomienda usar `app.js` en la raiz de la app. Ese archivo solo hace bootstrap del backend real que sigue viviendo en `server/src/server.js`.
 - Si tu hosting no acepta bien el entrypoint ESM raiz, deja como fallback `passenger.cjs`.
 - En produccion, CORS solo permite el origen configurado en `CLIENT_ORIGIN`.
+- `CLIENT_ORIGIN` acepta multiples dominios separados por comas y soporta comodines, por ejemplo `https://*.netlify.app`.
 - La autenticacion Fudo reutiliza token en memoria y lo refresca automaticamente al expirar.
 - La base queda lista para agregar despues modulos de `sales`, `items` y `payments`.
+
+## Netlify
+
+Para que el frontend en Netlify consuma el backend en cPanel:
+
+1. En Netlify configura `VITE_API_BASE_URL=https://api.drfries.cl/api/fudo`
+2. En cPanel configura `CLIENT_ORIGIN=https://drfries.cl,https://drfries.netlify.app,https://*.netlify.app`
+3. Reinicia la app Node.js en cPanel
+4. Redeploy del frontend en Netlify
+
+Con eso el frontend dejara de pedir `/api/fudo` al mismo dominio de Netlify y llamara directo al backend publicado en `api.drfries.cl`.

@@ -17,9 +17,7 @@ const DEFAULT_CLIENT_ORIGINS = [
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://drfries.cl',
-  'https://drfries.netlify.app'
-
+  
 ];
 const DEFAULT_FUDO_AUTH_URL = 'https://auth.fu.do/api';
 const DEFAULT_FUDO_API_BASE_URL = 'https://api.fu.do/v1alpha1';

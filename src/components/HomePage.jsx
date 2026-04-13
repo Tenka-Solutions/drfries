@@ -37,10 +37,10 @@ function getPromoProducts(products = []) {
   const promotions = availableProducts.filter((product) => product.category === 'Promociones');
 
   if (promotions.length > 0) {
-    return promotions.slice(0, 4);
+    return promotions.slice(0, 6);
   }
 
-  return availableProducts.slice(0, 4);
+  return availableProducts.slice(0, 6);
 }
 
 const HomePage = ({ onStartShopping, isCartOpen }) => {
